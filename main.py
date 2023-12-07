@@ -163,6 +163,8 @@ painter.add(player)
 
 player_movement = False
 
+player_movement = False
+
 while True:
     
     clock.tick(50)
@@ -175,6 +177,7 @@ while True:
             player_movement = True
         if event.type == pygame.KEYUP:
             player_movement = False
+ 
     
     if player_movement:
         player.move(event.key)
