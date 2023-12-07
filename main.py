@@ -58,8 +58,19 @@ class Player(Drawable):
         self.outline_color = (255, 255, 255)
         self.name = name
         
-    def move(self):
-        pass
+    def move(self, key):
+        
+        if key == pygame.K_RIGHT:
+            self.x += self.speed
+            
+        if key == pygame.K_LEFT:
+            self.x -= self.speed
+        
+        if key == pygame.K_UP:
+            self.y -= self.speed
+            
+        if key == pygame.K_DOWN:
+            self.y += self.speed
     
     def give_miam(self):
         pass
@@ -149,6 +160,8 @@ painter.add(player)
 for food in pantry:
     painter.add(food)
 
+player_movement = False
+
 while True:
     
     clock.tick(50)
@@ -157,7 +170,15 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-            
+        if event.type == pygame.KEYDOWN:
+            player_movement = True
+        if event.type == pygame.KEYUP:
+            player_movement = False
+ 
+    
+    if player_movement:
+        player.move(event.key)
+    
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
