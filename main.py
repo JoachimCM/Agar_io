@@ -78,8 +78,9 @@ class Player(Drawable):
     def scrounch(self, miams):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
-                self.mass += 0.1
+                self.mass += 0.5
                 miams.remove(miam)
+                
     
     def give_miam(self):
         pass
@@ -100,7 +101,38 @@ class Player(Drawable):
         drawText(self.name, (self.x * zoom + x - int(front_width / 2), 
                              self.y * zoom + y - int(front_height / 2)),
                              Player.NAME_COLOR)
+
+class Miam(Drawable):
     
+    def __init__(self, surface, camera):
+        super().__init__(surface, camera)
+        self.x = random.randint(20,1980)
+        self.y = random.randint(20,1980)
+        self.mass = 5
+        self.color = (random.randint(0, 255), 
+                      random.randint(0, 255), 
+                      random.randint(0, 255))
+        
+    def draw(self):
+        zoom = self.camera.zoom
+        x, y = self.camera.x, self.camera.y
+        center = (int(self.x * zoom + x), int(self.y * zoom + y))
+        pygame.draw.circle(self.surface, self.color, center, 
+                           int(self.mass * zoom))
+
+class Miams(Drawable):
+    
+    def __init__(self, surface, camera, nb_miams):
+        super().__init__(surface, camera)
+        self.nb_miams = nb_miams
+        self.list = []
+        for i in range(self.nb_miams):
+            self.list.append(Miam(self.surface, self.camera))
+            
+    def draw(self):
+        for miam in self.list: 
+            miam.draw()
+
 class Camera: 
     
     def __init__(self):
@@ -136,10 +168,12 @@ class Painter:
         
 camera = Camera()
 grid = Grid(SCREEN, camera)
+miams = Miams(SCREEN, camera, 2000)
 player = Player(SCREEN, camera, "Oeuf au plat")
 
 painter = Painter()
 painter.add(grid)
+painter.add(miams)
 painter.add(player)
 
 player_movement = False
@@ -160,7 +194,7 @@ while True:
     
     if player_movement:
         player.move(event.key)
-    
+    player.scrounch(miams.list)
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
