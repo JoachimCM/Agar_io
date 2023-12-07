@@ -5,6 +5,7 @@ Created on Thu Dec  7 09:37:45 2023
 """
 import pygame, sys, random
 
+pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
 PLATFORM_SIZE = 2000
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -13,10 +14,10 @@ GRID_SIZE = 25
 pygame.display.set_caption("Agar.io")
 clock = pygame.time.Clock()
 
-"""font = pygame.font.Font("arial", 20)
+font = pygame.font.SysFont("Arial", 20)
     
 def drawText(message,pos,color=(0,0,0)):
-    SCREEN.blit(font.render(message, 1, color), pos)"""
+    SCREEN.blit(font.render(message, 1, color), pos)
 
 class Drawable:
     
@@ -84,10 +85,10 @@ class Player(Drawable):
                            int((self.mass / 2 + 3) * zoom))
         pygame.draw.circle(self.surface, self.color, center, 
                            int(self.mass / 2 * zoom))
-        """ front_width, front_height = font.size(self.name)
+        front_width, front_height = font.size(self.name)
         drawText(self.name, (self.x * zoom + x - int(front_width / 2), 
                              self.y * zoom + y - int(front_height / 2)),
-                             Player.NAME_COLOR)"""
+                             Player.NAME_COLOR)
     
 class Camera: 
     
