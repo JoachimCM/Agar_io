@@ -3,7 +3,7 @@
 Created on Thu Dec  7 09:37:45 2023
 
 """
-import pygame, sys, random
+import pygame, sys, random, math
 
 SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
 PLATFORM_SIZE = 2000
@@ -50,13 +50,27 @@ class Player(Drawable):
         self.x = random.randint(100, 400)
         self.y = random.randint(100, 400)
         self.mass = 15
-        self.speed = 5
+        self.speed = 1
         self.color = (230, 255, 0)
         self.outline_color = (255, 255, 255)
         self.name = name
         
     def move(self):
-        pass
+        direction_x, direction_y = pygame.mouse.get_pos()
+        movement = math.atan2(direction_y - float(SCREEN_HEIGHT)/2, 
+                              direction_x - float(SCREEN_WIDTH)/2)
+        movement *= 100/math.pi
+        normal = (90 - math.fabs(movement))/90
+        
+        movement_x = self.speed * normal
+        movement_y = 0
+        if movement < 0:
+            movement_y = -self.speed + math.fabs(movement_x)
+        else: 
+            movement_y = self.speed - math.fabs(movement_x)
+            
+        self.x += movement_x
+        self.y += movement_y
     
     def give_miam(self):
         pass
@@ -127,7 +141,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-            
+    player.move()    
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
