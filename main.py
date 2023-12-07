@@ -24,6 +24,12 @@ def getDistance(a, b):
     y = math.fabs(a[1]-b[1])
     return ((x**2)+(y**2))**(0.5)
 
+def circle_surf(radius, color):
+    surf = pygame.Surface((radius * 2, radius * 2))
+    pygame.draw.circle(surf, color, (radius, radius), radius)
+    surf.set_colorkey((150, 0, 0))
+    return surf
+
 class Drawable:
     
     def __init__(self, surface, camera):
@@ -80,7 +86,7 @@ class Player(Drawable):
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
                 self.mass += 0.5
                 miams.remove(miam)
-                
+                particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(0, 20) / 10 - 1, -5], random.randint(6, 11)])
     
     def give_miam(self):
         pass
@@ -178,6 +184,8 @@ painter.add(player)
 
 player_movement = False
 
+particles = []
+
 while True:
     
     clock.tick(50)
@@ -198,4 +206,24 @@ while True:
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
+
+    for particle in particles:
+        particle[0][0] += particle[1][0]
+        particle[0][1] += particle[1][1]
+        particle[2] -= 0.1
+        particle[1][1] += 0.15
+        pygame.draw.circle(SCREEN, (200, 0, 0), [int(particle[0][0]), 
+                                                     int(particle[0][1])], 
+                           int(particle[2]))
+
+        radius = particle[2] * 2
+        SCREEN.blit(circle_surf(radius, (20, 20, 60)), 
+                    (int(particle[0][0] - radius), 
+                     int(particle[0][1] - radius)), 
+                    special_flags=pygame.BLEND_RGB_ADD)
+
+        if particle[2] <= 0:
+            particles.remove(particle)
+            
     pygame.display.flip()
+    pygame.display.update()
