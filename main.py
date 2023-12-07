@@ -5,7 +5,7 @@ Created on Thu Dec  7 09:37:45 2023
 """
 import pygame, sys, random
 
-SCREEN_WIDTH, SCREEN_HEIGHT = (1840,980)
+SCREEN_WIDTH, SCREEN_HEIGHT = (1500,700)
 PLATFORM_SIZE = 2000
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 GRID_SIZE = 25
@@ -38,12 +38,13 @@ class Grid(Drawable):
         
     def draw(self):
         zoom = self.camera.zoom
-        x, y = self.camera.x, self.camera.y 
+        x, y = self.camera.x, self.camera.y
         for i in range(0, PLATFORM_SIZE + 1, GRID_SIZE):
-           pygame.draw.line(self.surface, self.color, (x, i * zoom + y), 
-                            (PLATFORM_SIZE + 1 * zoom + x, i * zoom + y), 3)
-           pygame.draw.line(self.surface, self.color, (i * zoom + x, y), 
-                            (i * zoom + x, PLATFORM_SIZE + 1 * zoom + y), 3)
+            for j in range(0, PLATFORM_SIZE +1, GRID_SIZE):
+                pygame.draw.line(self.surface, self.color, (j, i * zoom),
+                                    (PLATFORM_SIZE + 1 * zoom, i * zoom), 3)
+                pygame.draw.line(self.surface, self.color, (j * zoom, i),
+                                    (j * zoom, PLATFORM_SIZE + 1 * zoom + i), 3)
 
 class Player(Drawable):
     NAME_COLOR = (0, 0, 0)
@@ -156,9 +157,9 @@ nb_food = NB_FOOD
 
 painter = Painter()
 painter.add(grid)
-painter.add(player)
 for food in pantry:
     painter.add(food)
+painter.add(player)
 
 player_movement = False
 
@@ -174,7 +175,6 @@ while True:
             player_movement = True
         if event.type == pygame.KEYUP:
             player_movement = False
- 
     
     if player_movement:
         player.move(event.key)
