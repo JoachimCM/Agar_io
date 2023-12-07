@@ -5,20 +5,21 @@ Created on Thu Dec  7 09:37:45 2023
 """
 import pygame, sys, random
 
-SCREEN_WIDTH, SCREEN_HEIGHT = (1500,700)
+pygame.init()
+SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
 PLATFORM_SIZE = 2000
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 GRID_SIZE = 25
 SIZE_OF_FOOD = 10
-NB_FOOD = 200
+NB_FOOD = 4000
 
 pygame.display.set_caption("Agar.io")
 clock = pygame.time.Clock()
 
-"""font = pygame.font.Font("arial", 20)
+font = pygame.font.SysFont("Arial", 20)
     
 def drawText(message,pos,color=(0,0,0)):
-    SCREEN.blit(font.render(message, 1, color), pos)"""
+    SCREEN.blit(font.render(message, 1, color), pos)
 
 class Drawable:
     
@@ -36,15 +37,15 @@ class Grid(Drawable):
         self.color = (255,255,255)
         
         
-    def draw(self):
+    def draw(self, ):
         zoom = self.camera.zoom
         x, y = self.camera.x, self.camera.y
         for i in range(0, PLATFORM_SIZE + 1, GRID_SIZE):
-            for j in range(0, PLATFORM_SIZE +1, GRID_SIZE):
-                pygame.draw.line(self.surface, self.color, (j, i * zoom),
-                                    (PLATFORM_SIZE + 1 * zoom, i * zoom), 3)
-                pygame.draw.line(self.surface, self.color, (j * zoom, i),
-                                    (j * zoom, PLATFORM_SIZE + 1 * zoom + i), 3)
+            pygame.draw.line(self.surface, self.color, (x, i * zoom + y),
+                                ((PLATFORM_SIZE + 1) * zoom + x, i * zoom + y), 3)
+            pygame.draw.line(self.surface, self.color, (i * zoom + x, y),
+                                (i * zoom + x, (PLATFORM_SIZE + 1) * zoom + y), 3)
+
 
 class Player(Drawable):
     NAME_COLOR = (0, 0, 0)
@@ -88,23 +89,26 @@ class Player(Drawable):
                            int((self.mass / 2 + 3) * zoom))
         pygame.draw.circle(self.surface, self.color, center, 
                            int(self.mass / 2 * zoom))
-        """ front_width, front_height = font.size(self.name)
+        front_width, front_height = font.size(self.name)
         drawText(self.name, (self.x * zoom + x - int(front_width / 2), 
                              self.y * zoom + y - int(front_height / 2)),
-                             Player.NAME_COLOR)"""
+                             Player.NAME_COLOR)
     
 class Food(Drawable):
     
     def __init__(self, surface, camera):
         super().__init__(surface, camera)
         self.color = [random.random() * 255, random.random() * 255, random.random() * 255]
-        self.center = [(random.random() * (PLATFORM_SIZE-(SIZE_OF_FOOD*4))) + SIZE_OF_FOOD*2, (random.random() * (PLATFORM_SIZE-(SIZE_OF_FOOD*4))) + SIZE_OF_FOOD * 2]
+        self.x = (random.random() * (PLATFORM_SIZE - (SIZE_OF_FOOD * 4))) + SIZE_OF_FOOD * 2
+        self.y = (random.random() * (PLATFORM_SIZE - (SIZE_OF_FOOD * 4))) + SIZE_OF_FOOD * 2
     
     def draw(self):
+        zoom = self.camera.zoom
+        x, y = self.camera.x, self.camera.y
         pygame.draw.circle(
-            self.surface, 
+            self.surface,
             self.color, 
-            self.center, 
+            [self.x * zoom + x, self.y * zoom + y], 
             SIZE_OF_FOOD)
     
 class Camera: 
@@ -140,11 +144,11 @@ class Painter:
         for drawing in self.paintings:
             drawing.draw()
 
-def draw_all_food(camera):
+def draw_all_food(surface, camera):
     pantry = []
     random.seed(random.random())
     for i in range(0, NB_FOOD):
-        new_food = Food(SCREEN, camera)
+        new_food = Food(surface, camera)
         pantry.append(new_food)
     return pantry
 
@@ -152,7 +156,7 @@ camera = Camera()
 grid = Grid(SCREEN, camera)
 player = Player(SCREEN, camera, "Bob")
 
-pantry = draw_all_food(SCREEN)
+pantry = draw_all_food(SCREEN, camera)
 nb_food = NB_FOOD
 
 painter = Painter()
@@ -162,8 +166,7 @@ for food in pantry:
 painter.add(player)
 
 player_movement = False
-
-player_movement = False
+event_key = 0
 
 while True:
     
@@ -175,12 +178,13 @@ while True:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             player_movement = True
+            event_key = event.key
         if event.type == pygame.KEYUP:
             player_movement = False
- 
     
     if player_movement:
-        player.move(event.key)
+        player.move(event_key)
+        pantry = draw_all_food(SCREEN, camera)
     
     camera.update(player)
     SCREEN.fill((0,0,0))
