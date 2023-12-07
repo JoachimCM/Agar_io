@@ -6,12 +6,12 @@ Created on Thu Dec  7 09:37:45 2023
 import pygame, sys, random, math
 
 pygame.init()
-SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
-PLATFORM_SIZE = 2000
+SCREEN_WIDTH, SCREEN_HEIGHT = (1000,600)
+PLATFORM_SIZE = 4000
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
-GRID_SIZE = 25
-SIZE_OF_FOOD = 10
-NB_FOOD = 4000
+GRID_SIZE = 50
+SIZE_OF_FOOD = 5
+NB_FOOD = PLATFORM_SIZE * 10
 
 pygame.display.set_caption("Agar.io")
 clock = pygame.time.Clock()
@@ -25,6 +25,12 @@ def getDistance(a, b):
     x = math.fabs(a[0]-b[0])
     y = math.fabs(a[1]-b[1])
     return ((x**2)+(y**2))**(0.5)
+
+def circle_surf(radius, color):
+    surf = pygame.Surface((radius * 2, radius * 2))
+    pygame.draw.circle(surf, color, (radius, radius), radius)
+    surf.set_colorkey((150, 0, 0))
+    return surf
 
 class Drawable:
     
@@ -45,7 +51,8 @@ class Grid(Drawable):
     def draw(self, ):
         zoom = self.camera.zoom
         x, y = self.camera.x, self.camera.y
-        for i in range(0, PLATFORM_SIZE + 1, GRID_SIZE):
+        print(int(((GRID_SIZE) / zoom) / (GRID_SIZE/2)))
+        for i in range(0, PLATFORM_SIZE + 1, GRID_SIZE * (1 + int(((GRID_SIZE) / zoom) / (GRID_SIZE/2)))):
             pygame.draw.line(self.surface, self.color, (x, i * zoom + y),
                                 ((PLATFORM_SIZE + 1) * zoom + x, i * zoom + y), 3)
             pygame.draw.line(self.surface, self.color, (i * zoom + x, y),
@@ -82,8 +89,11 @@ class Player(Drawable):
     def scrounch(self, miams):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
-                self.mass += 0.1
+                self.mass += 0.5
                 miams.remove(miam)
+                particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(0, 20) / 10 - 1, -5], random.randint(6, 11)])
+                miams.append(Miam(self.surface, self.camera))
+                
     
     def give_miam(self):
         pass
@@ -104,24 +114,38 @@ class Player(Drawable):
         drawText(self.name, (self.x * zoom + x - int(front_width / 2), 
                              self.y * zoom + y - int(front_height / 2)),
                              Player.NAME_COLOR)
-    
-class Food(Drawable):
+
+class Miam(Drawable):
     
     def __init__(self, surface, camera):
         super().__init__(surface, camera)
-        self.color = [random.random() * 255, random.random() * 255, random.random() * 255]
-        self.x = (random.random() * (PLATFORM_SIZE - (SIZE_OF_FOOD * 4))) + SIZE_OF_FOOD * 2
-        self.y = (random.random() * (PLATFORM_SIZE - (SIZE_OF_FOOD * 4))) + SIZE_OF_FOOD * 2
-    
+        self.x = random.randint(SIZE_OF_FOOD*2,PLATFORM_SIZE-SIZE_OF_FOOD*2)
+        self.y = random.randint(SIZE_OF_FOOD*2,PLATFORM_SIZE-SIZE_OF_FOOD*2)
+        self.mass = SIZE_OF_FOOD
+        self.color = (random.randint(0, 255), 
+                      random.randint(0, 255), 
+                      random.randint(0, 255))
+        
     def draw(self):
         zoom = self.camera.zoom
         x, y = self.camera.x, self.camera.y
-        pygame.draw.circle(
-            self.surface,
-            self.color, 
-            [self.x * zoom + x, self.y * zoom + y], 
-            SIZE_OF_FOOD)
+        center = (int(self.x * zoom + x), int(self.y * zoom + y))
+        pygame.draw.circle(self.surface, self.color, center, 
+                           int(self.mass * zoom))
+
+class Miams(Drawable):
     
+    def __init__(self, surface, camera, nb_miams):
+        super().__init__(surface, camera)
+        self.nb_miams = nb_miams
+        self.list = []
+        for i in range(self.nb_miams):
+            self.list.append(Miam(self.surface, self.camera))
+            
+    def draw(self):
+        for miam in self.list: 
+            miam.draw()
+
 class Camera: 
     
     def __init__(self):
@@ -155,29 +179,20 @@ class Painter:
         for drawing in self.paintings:
             drawing.draw()
 
-def draw_all_food(surface, camera):
-    pantry = []
-    random.seed(random.random())
-    for i in range(0, NB_FOOD):
-        new_food = Food(surface, camera)
-        pantry.append(new_food)
-    return pantry
-
 camera = Camera()
 grid = Grid(SCREEN, camera)
+miams = Miams(SCREEN, camera, NB_FOOD)
 player = Player(SCREEN, camera, "Oeuf au plat")
-
-pantry = draw_all_food(SCREEN, camera)
-nb_food = NB_FOOD
 
 painter = Painter()
 painter.add(grid)
-for food in pantry:
-    painter.add(food)
+painter.add(miams)
 painter.add(player)
 
 player_movement = False
 event_key = 0
+
+particles = []
 
 while True:
     
@@ -194,10 +209,30 @@ while True:
             player_movement = False
     
     if player_movement:
-        player.move(event_key)
-        pantry = draw_all_food(SCREEN, camera)
-    
+        player.move(event.key)
+
+    player.scrounch(miams.list)
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
+    for particle in particles:
+        particle[0][0] += particle[1][0]
+        particle[0][1] += particle[1][1]
+        particle[2] -= 0.1
+        particle[1][1] += 0.15
+        pygame.draw.circle(SCREEN, (200, 0, 0), [int(particle[0][0]), 
+                                                     int(particle[0][1])], 
+                           int(particle[2]))
+
+        radius = particle[2] * 2
+        SCREEN.blit(circle_surf(radius, (20, 20, 60)), 
+                    (int(particle[0][0] - radius), 
+                     int(particle[0][1] - radius)), 
+                    special_flags=pygame.BLEND_RGB_ADD)
+
+        if particle[2] <= 0:
+            particles.remove(particle)
+
     pygame.display.flip()
+    pygame.display.update()
+
