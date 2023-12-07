@@ -3,7 +3,7 @@
 Created on Thu Dec  7 09:37:45 2023
 
 """
-import pygame, sys, random
+import pygame, sys, random, math
 
 pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = (800,500)
@@ -20,6 +20,11 @@ font = pygame.font.SysFont("Arial", 20)
     
 def drawText(message,pos,color=(0,0,0)):
     SCREEN.blit(font.render(message, 1, color), pos)
+
+def getDistance(a, b):
+    x = math.fabs(a[0]-b[0])
+    y = math.fabs(a[1]-b[1])
+    return ((x**2)+(y**2))**(0.5)
 
 class Drawable:
     
@@ -73,6 +78,12 @@ class Player(Drawable):
             
         if key == pygame.K_DOWN:
             self.y += self.speed
+            
+    def scrounch(self, miams):
+        for miam in miams:
+            if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
+                self.mass += 0.1
+                miams.remove(miam)
     
     def give_miam(self):
         pass
@@ -154,7 +165,7 @@ def draw_all_food(surface, camera):
 
 camera = Camera()
 grid = Grid(SCREEN, camera)
-player = Player(SCREEN, camera, "Bob")
+player = Player(SCREEN, camera, "Oeuf au plat")
 
 pantry = draw_all_food(SCREEN, camera)
 nb_food = NB_FOOD
