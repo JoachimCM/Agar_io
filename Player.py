@@ -27,10 +27,10 @@ class Player(Drawable):
         self.outline_color = (255, 255, 255)
         self.name = name
         
-    def move(self, event):
+    def move(self, mouse):
         
-        
-        if event == pygame.MOUSEMOTION:
+    
+        if mouse == True:
             
             if (self.x < pygame.mouse.get_pos()[0]):
                 if (self.x + self.mass/2) < PLATFORM_SIZE:
@@ -63,7 +63,12 @@ class Player(Drawable):
         if key == pygame.K_DOWN:
             if (self.y + self.mass/2) < PLATFORM_SIZE:
                 self.y += self.speed
-         """   
+         """ 
+         
+    def not_yet(self):
+        if (self.x != pygame.mouse.get_pos()[0] or self.y != pygame.mouse.get_pos()[1]):
+            return True
+            
     def scrounch(self, miams, particles):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
