@@ -50,6 +50,13 @@ class Bot(Drawable):
                 #     particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
                 miams.append(Miam(self.surface, self.camera))
 
+    def canibalism(self, bots):
+        for bot in bots:
+            if getDistance((bot.x, bot.y), (self.x, self.y)) <= self.mass/2:
+                eater = self.mass - bot.mass
+                if eater > 1:
+                    bots.remove(bot)
+
     def too_big(self):
         if self.mass > 100:
             self.mass -= 0.01 * (self.mass/100)
