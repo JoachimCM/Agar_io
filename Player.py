@@ -30,16 +30,20 @@ class Player(Drawable):
     def move(self, key):
         
         if key == pygame.K_RIGHT:
-            self.x += self.speed
+            if (self.x + self.mass/2) < PLATFORM_SIZE:
+                self.x += self.speed
             
         if key == pygame.K_LEFT:
-            self.x -= self.speed
+            if (self.x - self.mass/2) > 0:
+                self.x -= self.speed
         
         if key == pygame.K_UP:
-            self.y -= self.speed
+            if (self.y - self.mass/2) > 0:
+                self.y -= self.speed
             
         if key == pygame.K_DOWN:
-            self.y += self.speed
+            if (self.y + self.mass/2) < PLATFORM_SIZE:
+                self.y += self.speed
             
     def scrounch(self, miams, particles):
         for miam in miams:
