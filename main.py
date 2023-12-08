@@ -57,6 +57,7 @@ while True:
         player.move(event.key)
 
     player.scrounch(miams.list, particles)
+    player.too_big()
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
@@ -65,9 +66,12 @@ while True:
         particle[0][1] += particle[1][1]
         particle[2] -= 0.1
         particle[1][1] += 0.15
-        pygame.draw.circle(SCREEN, (200, 0, 0), [int(particle[0][0]), 
-                                                     int(particle[0][1])], 
-                           int(particle[2]))
+        pygame.draw.circle(SCREEN, (random.randint(0, 255),
+                                    random.randint(0, 255),
+                                    random.randint(0, 255)),
+                                    [int(particle[0][0]), 
+                                        int(particle[0][1])], 
+                            int(particle[2]))
 
         radius = particle[2] * 2
         SCREEN.blit(circle_surf(radius, (20, 20, 60)), 
