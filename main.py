@@ -86,7 +86,7 @@ painter.add(bots)
 pygame.display.flip()
 
 running =True
-val_turn = 0
+
 while running:
     clock.tick(50)
     for event in pygame.event.get():
@@ -106,11 +106,9 @@ while running:
 
     player.scrounch(miams.list, particles)
     player.too_big()
-    if val_turn == 10:
-        bots.move_bots(miams.list)
-        bots.scrounchs(miams.list, particles)
-        bots.too_bigs()
-        val_turn = 0
+    bots.move_bots(miams.list)
+    bots.scrounchs(miams.list)
+    bots.too_bigs()
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
@@ -137,5 +135,4 @@ while running:
 
     pygame.display.flip()
     pygame.display.update()
-    val_turn += 1
 

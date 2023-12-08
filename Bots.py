@@ -18,9 +18,9 @@ class Bots(Drawable):
         for bot in self.list:
             bot.move_to_eat(miams)
 
-    def scrounchs(self, miams, particles):
+    def scrounchs(self, miams):
         for bot in self.list:
-            bot.scrounch(miams, particles)
+            bot.scrounch(miams)
 
     def too_bigs(self):
         for bot in self.list:

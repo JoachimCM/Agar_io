@@ -7,9 +7,12 @@ from Player import *
 def getDistance_and_direction(a, b):
     x = a[0]-b[0]
     y = a[1]-b[1]
+    
     x_fabs = math.fabs(x)
     y_fabs = math.fabs(y)
     value = ((x_fabs**2)+(y_fabs**2))**(0.5)
+    x /= value
+    y /= value
     return value, x, y
 
 class Bot(Drawable):
@@ -19,7 +22,7 @@ class Bot(Drawable):
         self.x = random.randint(100, 400)
         self.y = random.randint(100, 400)
         self.mass = DEFAULT_MASS
-        self.speed = 0.1
+        self.speed = 5
         self.color = (random.randint(0, 255),
                         random.randint(0, 255),
                         random.randint(0, 255))
@@ -38,13 +41,13 @@ class Bot(Drawable):
         self.x += x_min * self.speed
         self.y += y_min * self.speed
 
-    def scrounch(self, miams, particles):
+    def scrounch(self, miams):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
                 self.mass += 0.4 / (self.mass/20)
                 miams.remove(miam)
-                for i in range(0, NB_PARTICLES):
-                    particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
+                # for i in range(0, NB_PARTICLES):
+                #     particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
                 miams.append(Miam(self.surface, self.camera))
 
     def too_big(self):
