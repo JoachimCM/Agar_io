@@ -94,15 +94,19 @@ while running:
             running= False
             pygame.quit()
             sys.exit()
-    
+            
+        if event.type == pygame.MOUSEMOTION:
+            player_movement = True
+            current_event=pygame.MOUSEMOTION
+    """    
         if event.type == pygame.KEYDOWN:
             player_movement = True
-            event_key = event.key
+            current_event = event.key
         if event.type == pygame.KEYUP:
-            player_movement = False
-
-    if player_movement:
-        player.move(event.key)
+            current_event = False
+"""
+    player.move(current_event==pygame.MOUSEMOTION or player.not_yet())
+    current_event= 0
 
     player.scrounch(miams.list, particles)
     player.too_big()
