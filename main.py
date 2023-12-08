@@ -16,7 +16,6 @@ from Painter import *
 pygame.init()
 
 icone = pygame.image.load ('Agar_io_icone.png')
-neutral_background = pygame.image.load ('Agar_io_in_game.png')
 banner = pygame.image.load('Agar_io.png')
 pygame.display.set_caption("Agar.io")
 pygame.display.set_icon(icone)
@@ -39,6 +38,7 @@ def circle_surf(radius, color):
 game = Game() 
 
 running =True
+
 
 
 while running:  
@@ -66,11 +66,11 @@ while running:
                                 print ("Le partie a commencé ! Bonne chance!")
                                 pygame.display.flip()
                                 game.to_be_started= False
-                                pygame.mixer.music.fadeout(0.3)
+                                pygame.mixer.music.fadeout(3)
                                 pygame.mixer_music.unload()
                                 banner_song = pygame.mixer_music.load("stranger-things-124008.ogg")
                                 pygame.mixer_music.play(-1)
-                                pygame.mixer.music.set_volume(5)
+                                pygame.mixer.music.set_volume(0.3)
          
                                 camera = Camera()
                                 grid = Grid(SCREEN, camera)
@@ -90,14 +90,8 @@ while running:
                                 
                         else:
                                 print ("Ne quittez pas,une partie va recommencer !")
-            
-                    
         
-        
-        
-    
     else :
-
     
          for event in pygame.event.get():
              if event.type == pygame.QUIT:
@@ -108,7 +102,7 @@ while running:
              if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_SPACE :
                         if game.is_playing==False and game.to_be_started :
-                                game.is_playing=True 
+                                game.is_playing=True
                                 print ("Le partie a commencé ! Bonne chance!")
                                 pygame.display.flip()
                         else:
@@ -117,24 +111,27 @@ while running:
                     else:
                             player_movement = True
                             event_key = event.key
-                    if event.type == pygame.KEYUP:
-                            player_movement = False
-    
-         if player_movement:
-             player.move(event.key)
+            if event.type == pygame.KEYUP:
+                    player_movement = False
+    if player_movement:
+        player.move(event.key)
 
-         player.scrounch(miams.list, particles)
-         camera.update(player)
-         SCREEN.fill((0,0,0))
-         painter.paint()
-         for particle in particles:
-            particle[0][0] += particle[1][0]
-            particle[0][1] += particle[1][1]
-            particle[2] -= 0.1
-            particle[1][1] += 0.15
-            pygame.draw.circle(SCREEN, (200, 0, 0), [int(particle[0][0]), 
-                                                     int(particle[0][1])], 
-                                                     int(particle[2]))
+    player.scrounch(miams.list, particles)
+    player.too_big()
+    camera.update(player)
+    SCREEN.fill((0,0,0))
+    painter.paint()
+    for particle in particles:
+        particle[0][0] += particle[1][0]
+        particle[0][1] += particle[1][1]
+        particle[2] -= 0.1
+        particle[1][1] += 0.15
+        pygame.draw.circle(SCREEN, (random.randint(0, 255),
+                                    random.randint(0, 255),
+                                    random.randint(0, 255)),
+                                    [int(particle[0][0]), 
+                                        int(particle[0][1])], 
+                            int(particle[2]))
 
             radius = particle[2] * 2
             SCREEN.blit(circle_surf(radius, (20, 20, 60)), 
