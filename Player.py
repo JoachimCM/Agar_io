@@ -19,8 +19,8 @@ class Player(Drawable):
     
     def __init__(self, surface, camera, name=""):
         super().__init__(surface, camera)
-        self.x = random.randint(100, 400)
-        self.y = random.randint(100, 400)
+        self.x = random.randint(100, PLATFORM_SIZE-100)
+        self.y = random.randint(100, PLATFORM_SIZE-100)
         self.mass = DEFAULT_MASS
         self.speed = 5
         self.color = (230, 255, 0)
@@ -53,6 +53,21 @@ class Player(Drawable):
                 for i in range(0, NB_PARTICLES):
                     particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
                 miams.append(Miam(self.surface, self.camera))
+    
+    def canibal_scrounch(self, bots):
+        for bot in bots:
+            if self.mass < bot.mass:
+                bigger = bot.mass
+            else:
+                bigger = self.mass
+            if getDistance((bot.x, bot.y), (self.x, self.y)) <= bigger/2:
+                eater = self.mass - bot.mass
+                if eater > 1:
+                    self.mass += bot.mass*0.5
+                    bots.remove(bot)
+                elif eater < -1:
+                    return False
+        return True
     
     def too_big(self):
         if self.mass > 100:

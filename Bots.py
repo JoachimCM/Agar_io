@@ -11,12 +11,12 @@ class Bots(Drawable):
             self.list.append(Bot(self.surface, self.camera))
             
     def draw(self):
-        for bot in self.list: 
+        for bot in self.list:
             bot.draw()
 
-    def move_bots(self, miams):
+    def move_bots(self, miams, player):
         for bot in self.list:
-            bot.move_to_eat(miams)
+            bot.move_to_eat(miams, self.list, player)
 
     def scrounchs(self, miams):
         for bot in self.list:
@@ -25,3 +25,7 @@ class Bots(Drawable):
     def too_bigs(self):
         for bot in self.list:
             bot.too_big()
+
+    def eat_them_all(self):
+        for bot in self.list:
+            bot.canibalism(self.list)

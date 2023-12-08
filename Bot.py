@@ -11,17 +11,21 @@ def getDistance_and_direction(a, b):
     x_fabs = math.fabs(x)
     y_fabs = math.fabs(y)
     value = ((x_fabs**2)+(y_fabs**2))**(0.5)
-    x /= value
-    y /= value
+    if value != 0:
+        x /= value
+        y /= value
+    else:
+        x = 0
+        y = 0
     return value, x, y
 
 class Bot(Drawable):
     
     def __init__(self, surface, camera):
         super().__init__(surface, camera)
-        self.x = random.randint(100, 400)
-        self.y = random.randint(100, 400)
-        self.mass = DEFAULT_MASS
+        self.x = random.randint(100, PLATFORM_SIZE-100)
+        self.y = random.randint(100, PLATFORM_SIZE-100)
+        self.mass = DEFAULT_MASS_BOT
         self.speed = 5
         self.color = (random.randint(0, 255),
                         random.randint(0, 255),
@@ -30,7 +34,9 @@ class Bot(Drawable):
                                 random.randint(0, 255),
                                 random.randint(0, 255))
 
-    def move_to_eat(self, miams):
+    def move_to_eat(self, miams, bots, player):
+        is_traking_player = False
+        
         distance_min, x_min, y_min = getDistance_and_direction((miams[0].x, miams[0].y), (self.x, self.y))
         for miam in miams:
             distance, x, y = getDistance_and_direction((miam.x, miam.y), (self.x, self.y))
@@ -38,6 +44,22 @@ class Bot(Drawable):
                 distance_min = distance
                 x_min = x
                 y_min = y
+
+        distance_player, x_player, y_player = getDistance_and_direction((player.x, player.y), (self.x, self.y))
+        if self.mass > player.mass + 2 and distance_player < distance_min*5:
+            distance_min = distance_player
+            x_min = x_player
+            y_min = y_player
+            is_traking_player = True
+
+        for bot in bots:
+            distance_bot, x_bot, y_bot = getDistance_and_direction((bot.x, bot.y), (self.x, self.y))
+            if  (is_traking_player and distance_bot < distance_min and self.mass > bot.mass + 2) or \
+                (is_traking_player == False and distance_bot < distance_min*5 and self.mass > bot.mass + 2):
+                distance_min = distance_bot
+                x_min = x_bot
+                y_min = y_bot
+
         self.x += x_min * self.speed
         self.y += y_min * self.speed
 
@@ -52,10 +74,18 @@ class Bot(Drawable):
 
     def canibalism(self, bots):
         for bot in bots:
-            if getDistance((bot.x, bot.y), (self.x, self.y)) <= self.mass/2:
+            if self.mass < bot.mass:
+                bigger = bot.mass
+            else:
+                bigger = self.mass
+            if getDistance((bot.x, bot.y), (self.x, self.y)) <= bigger/2:
                 eater = self.mass - bot.mass
                 if eater > 1:
+                    self.mass += bot.mass*0.5
                     bots.remove(bot)
+                elif eater < -1:
+                    bot.mass += self.mass*0.5
+                    bots.remove(self)
 
     def too_big(self):
         if self.mass > 100:

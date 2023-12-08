@@ -16,7 +16,7 @@ from Bots import *
 
 pygame.init()
 
-random.seed(SEED)
+random.seed()
 
 icone = pygame.image.load ('Agar_io_icone.png')
 banner = pygame.image.load('Agar_io.png')
@@ -76,7 +76,7 @@ painter = Painter()
 
 player_movement = False
 event_key = 0
-particles = []    
+particles = []
 
 painter.add(grid)
 painter.add(miams)
@@ -106,8 +106,12 @@ while running:
 
     player.scrounch(miams.list, particles)
     player.too_big()
-    bots.move_bots(miams.list)
+    if player.canibal_scrounch(bots.list) == False:
+        print("LOOOOOOOOSE")
+        break
+    bots.move_bots(miams.list, player)
     bots.scrounchs(miams.list)
+    bots.eat_them_all()
     bots.too_bigs()
     camera.update(player)
     SCREEN.fill((0,0,0))
