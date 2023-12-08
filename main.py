@@ -12,8 +12,11 @@ from Miam import *
 from Miams import *
 from Camera import * 
 from Painter import *
+from Bots import *
 
 pygame.init()
+
+random.seed()
 
 icone = pygame.image.load ('Agar_io_icone.png')
 banner = pygame.image.load('Agar_io.png')
@@ -68,21 +71,23 @@ camera = Camera()
 grid = Grid(SCREEN, camera)
 miams = Miams(SCREEN, camera, NB_FOOD)
 player = Player(SCREEN, camera, "Oeuf au plat")
+bots = Bots(SCREEN, camera, NB_BOTS)
 painter = Painter()
 
 player_movement = False
 event_key = 0
-particles = []    
+particles = []
 
 painter.add(grid)
 painter.add(miams)
 painter.add(player)
+painter.add(bots)
 
 pygame.display.flip()
 
 running =True
 
-while running:  
+while running:
     clock.tick(50)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -101,6 +106,13 @@ while running:
 
     player.scrounch(miams.list, particles)
     player.too_big()
+    if player.canibal_scrounch(bots.list) == False:
+        print("LOOOOOOOOSE")
+        break
+    bots.move_bots(miams.list, player)
+    bots.scrounchs(miams.list)
+    bots.eat_them_all()
+    bots.too_bigs()
     camera.update(player)
     SCREEN.fill((0,0,0))
     painter.paint()
