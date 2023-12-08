@@ -4,21 +4,6 @@ from Drawable import *
 from config import *
 from Player import *
 
-def getDistance_and_direction(a, b):
-    x = a[0]-b[0]
-    y = a[1]-b[1]
-    
-    x_fabs = math.fabs(x)
-    y_fabs = math.fabs(y)
-    value = ((x_fabs**2)+(y_fabs**2))**(0.5)
-    if value != 0:
-        x /= value
-        y /= value
-    else:
-        x = 0
-        y = 0
-    return value, x, y
-
 class Bot(Drawable):
     
     def __init__(self, surface, camera):
@@ -46,7 +31,7 @@ class Bot(Drawable):
                 y_min = y
 
         distance_player, x_player, y_player = getDistance_and_direction((player.x, player.y), (self.x, self.y))
-        if self.mass > player.mass + 2 and distance_player < distance_min*5:
+        if self.mass > player.mass + DIFF_TO_EAT + 1 and distance_player < distance_min*5:
             distance_min = distance_player
             x_min = x_player
             y_min = y_player
@@ -54,8 +39,13 @@ class Bot(Drawable):
 
         for bot in bots:
             distance_bot, x_bot, y_bot = getDistance_and_direction((bot.x, bot.y), (self.x, self.y))
-            if  (is_traking_player and distance_bot < distance_min and self.mass > bot.mass + 2) or \
-                (is_traking_player == False and distance_bot < distance_min*5 and self.mass > bot.mass + 2):
+            if  (is_traking_player and \
+                    distance_bot < distance_min and \
+                    self.mass > bot.mass + DIFF_TO_EAT + 1) \
+                or \
+                (is_traking_player == False and \
+                    distance_bot < distance_min*5 and \
+                    self.mass > bot.mass + DIFF_TO_EAT + 1):
                 distance_min = distance_bot
                 x_min = x_bot
                 y_min = y_bot
@@ -63,13 +53,22 @@ class Bot(Drawable):
         self.x += x_min * self.speed
         self.y += y_min * self.speed
 
+    def check_if_out(self):
+            if  (self.x + (self.mass/2)) >= PLATFORM_SIZE:
+                self.x -= (self.x + (self.mass/2)) - PLATFORM_SIZE
+            if (self.x - (self.mass/2)) < 0:
+                self.x -= (self.x + (self.mass/2))
+            if (self.y + (self.mass/2)) >= PLATFORM_SIZE:
+                self.y -= (self.y + (self.mass/2)) - PLATFORM_SIZE
+            if (self.y - (self.mass/2)) < 0:
+                self.y -= (self.y + (self.mass/2))
+
     def scrounch(self, miams):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
                 self.mass += 0.4 / (self.mass/20)
+                self.check_if_out()
                 miams.remove(miam)
-                # for i in range(0, NB_PARTICLES):
-                #     particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
                 miams.append(Miam(self.surface, self.camera))
 
     def canibalism(self, bots):
@@ -80,11 +79,13 @@ class Bot(Drawable):
                 bigger = self.mass
             if getDistance((bot.x, bot.y), (self.x, self.y)) <= bigger/2:
                 eater = self.mass - bot.mass
-                if eater > 1:
+                if eater > DIFF_TO_EAT:
                     self.mass += bot.mass*0.5
+                    self.check_if_out()
                     bots.remove(bot)
-                elif eater < -1:
+                elif eater < -DIFF_TO_EAT:
                     bot.mass += self.mass*0.5
+                    self.check_if_out()
                     bots.remove(self)
 
     def too_big(self):

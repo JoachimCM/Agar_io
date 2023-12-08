@@ -14,6 +14,21 @@ def getDistance(a, b):
     y = math.fabs(a[1]-b[1])
     return ((x**2)+(y**2))**(0.5)
 
+def getDistance_and_direction(a, b):
+    x = a[0]-b[0]
+    y = a[1]-b[1]
+    
+    x_fabs = math.fabs(x)
+    y_fabs = math.fabs(y)
+    value = ((x_fabs**2)+(y_fabs**2))**(0.5)
+    if value != 0:
+        x /= value
+        y /= value
+    else:
+        x = 0
+        y = 0
+    return value, x, y
+
 class Player(Drawable):
     NAME_COLOR = (0, 0, 0)
     
@@ -31,53 +46,42 @@ class Player(Drawable):
         
     
         if mouse == True:
-            
-            if (self.x < pygame.mouse.get_pos()[0]):
-                if (self.x + self.mass/2) < PLATFORM_SIZE:
-                    self.x += self.speed
-                    
-            if (self.x > pygame.mouse.get_pos()[0]):
-                if (self.x - self.mass/2) < PLATFORM_SIZE:
-                    self.x -= self.speed
-                    
-            if (self.y < pygame.mouse.get_pos()[1]):
-                if (self.y + self.mass/2) < PLATFORM_SIZE:
-                    self.y += self.speed
-                    
-            if (self.y > pygame.mouse.get_pos()[1]):
-                if (self.y - self.mass/2) < PLATFORM_SIZE:
-                    self.y -= self.speed       
-        """
-        if key == pygame.K_RIGHT:
-            if (self.x + self.mass/2) < PLATFORM_SIZE:
-                self.x += self.speed
-            
-        if key == pygame.K_LEFT:
-            if (self.x - self.mass/2) > 0:
-                self.x -= self.speed
-        
-        if key == pygame.K_UP:
-            if (self.y - self.mass/2) > 0:
-                self.y -= self.speed
-            
-        if key == pygame.K_DOWN:
-            if (self.y + self.mass/2) < PLATFORM_SIZE:
-                self.y += self.speed
-         """ 
-         
+            distance, x, y = getDistance_and_direction((0, 0), (
+                pygame.mouse.get_pos()[0]-(SCREEN_WIDTH/2), 
+                pygame.mouse.get_pos()[1]-(SCREEN_HEIGHT/2)))
+            futur_x = self.x - (x * self.speed)
+            futur_y = self.y - (y * self.speed)
+            if  (futur_x + (self.mass/2)) < PLATFORM_SIZE and \
+                    (futur_x - (self.mass/2)) > 0:
+                self.x = futur_x
+            if (futur_y + (self.mass/2)) < PLATFORM_SIZE and \
+                    (futur_y - (self.mass/2)) > 0:
+                self.y = futur_y
+
     def not_yet(self):
         if (self.x != pygame.mouse.get_pos()[0] or self.y != pygame.mouse.get_pos()[1]):
             return True
-            
+
+    def check_if_out(self):
+        if  (self.x + (self.mass/2)) >= PLATFORM_SIZE:
+            self.x -= (self.x + (self.mass/2)) - PLATFORM_SIZE
+        if (self.x - (self.mass/2)) < 0:
+            self.x -= (self.x + (self.mass/2))
+        if (self.y + (self.mass/2)) >= PLATFORM_SIZE:
+            self.y -= (self.y + (self.mass/2)) - PLATFORM_SIZE
+        if (self.y - (self.mass/2)) < 0:
+            self.y -= (self.y + (self.mass/2))
+
     def scrounch(self, miams, particles):
         for miam in miams:
             if getDistance((miam.x, miam.y), (self.x, self.y)) <= self.mass/2:
                 self.mass += 0.5 / (self.mass/20)
+                self.check_if_out()
                 miams.remove(miam)
                 for i in range(0, NB_PARTICLES):
                     particles.append([[SCREEN_WIDTH/2 , SCREEN_HEIGHT/2], [random.randint(-80, 80) / 10 - 1, random.randint(-80, 80) / 10 - 1], random.randint(6, 11)])
                 miams.append(Miam(self.surface, self.camera))
-    
+
     def canibal_scrounch(self, bots):
         for bot in bots:
             if self.mass < bot.mass:
@@ -86,10 +90,11 @@ class Player(Drawable):
                 bigger = self.mass
             if getDistance((bot.x, bot.y), (self.x, self.y)) <= bigger/2:
                 eater = self.mass - bot.mass
-                if eater > 1:
+                if eater > DIFF_TO_EAT:
                     self.mass += bot.mass*0.5
+                    self.check_if_out()
                     bots.remove(bot)
-                elif eater < -1:
+                elif eater < -DIFF_TO_EAT:
                     return False
         return True
     

@@ -89,6 +89,7 @@ running =True
 
 while running:
     clock.tick(50)
+    current_event=0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running= False
