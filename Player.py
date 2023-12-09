@@ -66,11 +66,11 @@ class Player(Drawable):
         if  (self.x + (self.mass/2)) >= PLATFORM_SIZE:
             self.x -= (self.x + (self.mass/2)) - PLATFORM_SIZE
         if (self.x - (self.mass/2)) < 0:
-            self.x -= (self.x + (self.mass/2))
+            self.x -= (self.x - (self.mass/2))
         if (self.y + (self.mass/2)) >= PLATFORM_SIZE:
             self.y -= (self.y + (self.mass/2)) - PLATFORM_SIZE
         if (self.y - (self.mass/2)) < 0:
-            self.y -= (self.y + (self.mass/2))
+            self.y -= (self.y - (self.mass/2))
 
     def scrounch(self, miams, particles):
         for miam in miams:

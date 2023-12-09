@@ -16,10 +16,12 @@ from Bots import *
 
 pygame.init()
 
-random.seed()
+random.seed(SEED)
 
 icone = pygame.image.load ('Agar_io_icone.png')
 banner = pygame.image.load('Agar_io.png')
+win_banner = pygame.image.load('Agar_io_win.png')
+lose_banner = pygame.image.load('Agar_io_lose.png')
 pygame.display.set_caption("Agar.io")
 pygame.display.set_icon(icone)
 clock = pygame.time.Clock()
@@ -29,6 +31,7 @@ class Game :
     def __init__(self):
         self.is_playing=False
         self.to_be_started=True
+        self.is_ending = False
         
     def start(self):
         playing_song = pygame.mixer_music.load("i-wanna-feel-110039.ogg")
@@ -47,17 +50,55 @@ class Game :
             
                 if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_SPACE :
-                        # if self.to_be_started :
                         self.is_playing=True 
                         print ("Le partie a commencé ! Bonne chance!")
                         pygame.display.flip()
-                        # self.to_be_started= False
                         pygame.mixer.music.fadeout(3)
                         pygame.mixer_music.unload()
                         banner_song = pygame.mixer_music.load("stranger-things-124008.ogg")
                         pygame.mixer_music.play(-1)
                         pygame.mixer.music.set_volume(0.3)
+
+    def end_win(self):
+        playing_song = pygame.mixer_music.load("GODS.ogg")
+        pygame.mixer_music.play(-1)
+        pygame.mixer.music.set_volume(0.5)
+        SCREEN.blit(win_banner,(0,0))
+        pygame.display.flip()
         
+        while self.is_ending==False:
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.is_ending = True
+                    pygame.quit()
+                    sys.exit()
+            
+                if event.type == pygame.KEYDOWN:
+                    if event.key== pygame.K_SPACE :
+                        self.is_ending = True
+                        print ("C'est fini !")
+
+    def end_lose(self):
+        playing_song = pygame.mixer_music.load("lose_music.ogg")
+        pygame.mixer_music.play(-1)
+        pygame.mixer.music.set_volume(0.5)
+        SCREEN.blit(lose_banner,(0,0))
+        pygame.display.flip()
+        
+        while self.is_ending==False:
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.is_ending = True
+                    pygame.quit()
+                    sys.exit()
+            
+                if event.type == pygame.KEYDOWN:
+                    if event.key== pygame.K_SPACE :
+                        self.is_ending = True 
+                        print ("C'est fini !")
+
 def circle_surf(radius, color):
     surf = pygame.Surface((radius * 2, radius * 2))
     pygame.draw.circle(surf, color, (radius, radius), radius)
@@ -99,20 +140,18 @@ while running:
         if event.type == pygame.MOUSEMOTION:
             player_movement = True
             current_event=pygame.MOUSEMOTION
-    """    
-        if event.type == pygame.KEYDOWN:
-            player_movement = True
-            current_event = event.key
-        if event.type == pygame.KEYUP:
-            current_event = False
-"""
+
+
     player.move(current_event==pygame.MOUSEMOTION or player.not_yet())
     current_event= 0
 
     player.scrounch(miams.list, particles)
     player.too_big()
     if player.canibal_scrounch(bots.list) == False:
-        print("LOOOOOOOOSE")
+        game.end_lose()
+        break
+    if len(bots.list) == 0:
+        game.end_win()
         break
     bots.move_bots(miams.list, player)
     bots.scrounchs(miams.list)
