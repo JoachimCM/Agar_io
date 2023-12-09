@@ -50,18 +50,25 @@ class Bot(Drawable):
                 x_min = x_bot
                 y_min = y_bot
 
-        self.x += x_min * self.speed
-        self.y += y_min * self.speed
+        futur_x = self.x + (x_min * self.speed)
+        futur_y = self.y + (y_min * self.speed)
+
+        if  (futur_x + (self.mass/2)) < PLATFORM_SIZE and \
+                (futur_x - (self.mass/2)) > 0:
+            self.x = futur_x
+        if (futur_y + (self.mass/2)) < PLATFORM_SIZE and \
+                (futur_y - (self.mass/2)) > 0:
+            self.y = futur_y
 
     def check_if_out(self):
             if  (self.x + (self.mass/2)) >= PLATFORM_SIZE:
                 self.x -= (self.x + (self.mass/2)) - PLATFORM_SIZE
             if (self.x - (self.mass/2)) < 0:
-                self.x -= (self.x + (self.mass/2))
+                self.x -= (self.x - (self.mass/2))
             if (self.y + (self.mass/2)) >= PLATFORM_SIZE:
                 self.y -= (self.y + (self.mass/2)) - PLATFORM_SIZE
             if (self.y - (self.mass/2)) < 0:
-                self.y -= (self.y + (self.mass/2))
+                self.y -= (self.y - (self.mass/2))
 
     def scrounch(self, miams):
         for miam in miams:
