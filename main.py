@@ -13,6 +13,7 @@ from Miams import *
 from Camera import * 
 from Painter import *
 from Bots import *
+from Confettis import*
 
 pygame.init()
 
@@ -63,12 +64,17 @@ class Game :
         playing_song = pygame.mixer_music.load("GODS.ogg")
         pygame.mixer_music.play(-1)
         pygame.mixer.music.set_volume(0.5)
-        SCREEN.blit(win_banner,(0,0))
-        pygame.display.flip()
         
         while self.is_ending==False:
+             SCREEN.blit(win_banner,(0,0))
+             for n in range (len(group)):
+                 group[n].turn = "on"
+             #SCREEN2.fill(0)
+             generate(SCREEN)
+             clock.tick(60)
+             pygame.display.flip()
             
-            for event in pygame.event.get():
+             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.is_ending = True
                     pygame.quit()
